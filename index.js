@@ -50,8 +50,8 @@ client.once('ready', async () => {
 			}
 		}
 	});
-	cron.schedule('15 23 * * *', async () => {
-		await sendDailyQuestions("Scheduled 4:15PM PST TEST");
+	cron.schedule('21 23 * * *', async () => {
+		await sendDailyQuestions("Scheduled 4:21PM PST TEST");
 	});
 
 	async function sendDailyQuestions(prefix = "LeetCode Questions of the Day") {
