@@ -1,68 +1,59 @@
-// index.js
 const { Client, GatewayIntentBits } = require('discord.js');
 const cron = require('node-cron');
-const questions = require('./questions');
+const codeQuestions = require('./codeQuestions');
+const systemDesignQuestions = require('./designQuestions');
 require('dotenv').config();
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
 
-let questionIndex = 0;
+let codeIndex = 0;
+let designIndex = 0;
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
   try {
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
     if (channel) {
-      await channel.send("✅ Bot is online and ready to send LeetCode questions!");
+      await channel.send("✅ Bot is online and ready to send LeetCode and System Design questions!");
     }
   } catch (err) {
     console.error("Failed to send startup message:", err);
   }
-  // Schedule to send a message every day at 7 PM PST (2 AM UTC)
+
+  // ⏰ LeetCode Questions - 7PM PST (2AM UTC)
   cron.schedule('0 2 * * *', async () => {
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-    if (channel && questions.length > 0) {
-      const question1 = questions[questionIndex % questions.length];
-      const question2 = questions[(questionIndex + 1) % questions.length];
-      await channel.send(`LeetCode Questions of the Day:\n1. ${question1}\n2. ${question2}`);
-      questionIndex += 2;
-    }
+    await sendCodeQuestions();
   });
 
-	cron.schedule('5 0 * * *', async () => {
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-    if (channel && questions.length > 0) {
-      const question1 = questions[questionIndex % questions.length];
-      const question2 = questions[(questionIndex + 1) % questions.length];
-      await channel.send(`LeetCode Questions of the Day:\n1. ${question1}\n2. ${question2}`);
-      questionIndex += 2;
-    }
+  // ⏰ System Design Question - 8PM PST (3AM UTC)
+  cron.schedule('0 3 * * *', async () => {
+    await sendSystemDesignQuestion();
   });
 
-	client.on('messageCreate', async message => {
-		if (message.content === '!daily') {
-			const channel = message.channel;
-			if (channel && questions.length > 0) {
-				const question1 = questions[questionIndex % questions.length];
-				const question2 = questions[(questionIndex + 1) % questions.length];
-				await channel.send(`📌 LeetCode Daily Questions:\n1. ${question1}\n2. ${question2}`);
-				questionIndex += 2;
-			}
-		}
-	});
-	cron.schedule('21 23 * * *', async () => {
-		await sendDailyQuestions("Scheduled 4:21PM PST TEST");
-	});
+  async function sendCodeQuestions() {
+    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+    if (channel && codeQuestions.length > 0) {
+      const question1 = codeQuestions[codeIndex % codeQuestions.length];
+      const question2 = codeQuestions[(codeIndex + 1) % codeQuestions.length];
+      await channel.send(`📌 Daily 7PM - 8PM PST: LeetCode Questions of the Day:\n1. ${question1}\n2. ${question2}`);
+      codeIndex += 2;
+    }
+  }
 
-	async function sendDailyQuestions(prefix = "LeetCode Questions of the Day") {
-		const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-		if (channel && questions.length > 0) {
-			const question1 = questions[questionIndex % questions.length];
-			const question2 = questions[(questionIndex + 1) % questions.length];
-			await channel.send(`${prefix}:\n1. ${question1}\n2. ${question2}`);
-			questionIndex += 2;
-		}
-	}
+  async function sendSystemDesignQuestion() {
+    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+    if (channel && systemDesignQuestions.length > 0) {
+      const question = systemDesignQuestions[designIndex % systemDesignQuestions.length];
+      await channel.send(`🛠️ Daily 8PM - 9PM PST: System Design Question of the Day:\n${question}`);
+      designIndex += 1;
+    }
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
