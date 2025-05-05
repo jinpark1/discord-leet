@@ -57,3 +57,12 @@ client.once('ready', async () => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+// ✅ Fake HTTP server to keep Railway container alive
+const http = require('http');
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Discord bot is running\n');
+}).listen(process.env.PORT || 3000, () => {
+  console.log('✅ Fake HTTP server running to keep Railway alive');
+});
