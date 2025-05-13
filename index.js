@@ -32,9 +32,9 @@ client.once('ready', async () => {
   });
 
   // ⏰ System Design Question - 8PM PST (3AM UTC)
-  cron.schedule('0 3 * * *', async () => {
-    await sendSystemDesignQuestion();
-  });
+  // cron.schedule('0 3 * * *', async () => {
+  //   await sendSystemDesignQuestion();
+  // });
 
   async function sendCodeQuestions() {
     const channel = await client.channels.fetch(process.env.CHANNEL_ID);
